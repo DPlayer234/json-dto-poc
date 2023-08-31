@@ -12,6 +12,7 @@ public interface ISomeData
 public interface ISomeOtherData
 {
     int Value { get; }
+    int? Nullable { get; }
 }
 
 public record SomeData
@@ -23,5 +24,6 @@ public record SomeData
 
 public record SomeOtherData
 (
-    int Value
+    int Value,
+    int? Nullable
 ) : ISomeOtherData;

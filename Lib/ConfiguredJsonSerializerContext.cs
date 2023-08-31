@@ -11,6 +11,7 @@ namespace Lib;
 public sealed class ConfiguredJsonSerializerContext : JsonSerializerContext, IJsonTypeInfoResolver
 {
     private readonly List<IJsonTypeInfoResolver> _contexts = new();
+    private readonly List<DataObjectConfig> _dtoConfigs = new();
     private readonly Action<JsonTypeInfo>? _configureTypeInfos;
 
     private readonly ConcurrentDictionary<Type, JsonTypeInfo?> _typeInfoCache = new();
@@ -20,10 +21,12 @@ public sealed class ConfiguredJsonSerializerContext : JsonSerializerContext, IJs
     (
         JsonSerializerOptions options,
         IEnumerable<IJsonTypeInfoResolver> contexts,
+        IEnumerable<DataObjectConfig> dtoConfigs,
         Action<JsonTypeInfo>? configureTypeInfos
     ) : base(options)
     {
         _contexts.AddRange(contexts);
+        _dtoConfigs.AddRange(dtoConfigs);
         _configureTypeInfos = configureTypeInfos;
 
         _getTypeInfoFromContexts = GetTypeInfoFromContexts;
@@ -62,8 +65,14 @@ public sealed class ConfiguredJsonSerializerContext : JsonSerializerContext, IJs
             }
         }
 
-        // Implemented interfaces are implicitly included in the contexts' metadata
-        // so we need to do nothing about them.
+        // Interfaces aren't automatically included, so generate them from the DTO config
+        foreach (var dto in _dtoConfigs)
+        {
+            if (dto.InterfaceType == type)
+            {
+                return dto.CreateInterfaceTypeInfo(options);
+            }
+        }
 
         // This code essentially exists to allow the "no extra properties" to work in any case.
         // The string and object metadata is only provided for cases where those converters aren't already present.

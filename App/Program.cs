@@ -21,7 +21,10 @@ internal class Program
             {
                 m.SetPropertyName(p => p.Text, "__text");
             })
-            .WithDataObject<ISomeOtherData, SomeOtherData>()
+            .WithDataObject<ISomeOtherData, SomeOtherData>(m =>
+            {
+                m.SetPropertyConverter(p => p.Nullable, new IntAsStringConverter());
+            })
             .Build();
 
         // Examples
@@ -40,6 +43,9 @@ internal class Program
 
         var reverseWithOptional = JsonSerializer.Serialize(new SomeData(72, "HHH", new(new SomeData(111, "11111"))), context.GetTypeInfo<ISomeData>()!);
         Console.WriteLine(reverseWithOptional);
+
+        var other = JsonSerializer.Deserialize("""{"value":5,"nullable":"16"}""", context.GetTypeInfo<ISomeOtherData>()!);
+        Console.WriteLine(other);
 
         // Missing properties
         try

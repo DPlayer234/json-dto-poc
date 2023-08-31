@@ -29,7 +29,7 @@ public sealed class JsonSerializerContextConfig
             }
         }
 
-        return new ConfiguredJsonSerializerContext(options, _contexts, _configureTypeInfos);
+        return new ConfiguredJsonSerializerContext(options, _contexts, _dtoConfigs, _configureTypeInfos);
     }
 
     public JsonSerializerContextConfig WithOptions(JsonSerializerOptions options)
@@ -48,7 +48,7 @@ public sealed class JsonSerializerContextConfig
         where TModel : TInterface
         where TInterface : class
     {
-        DataObjectConfig<TModel> config = new(typeof(TInterface), new JsonInterfaceConverterFactory<TInterface, TModel>());
+        DataObjectConfig<TInterface, TModel> config = new();
         configure?.Invoke(config);
 
         _configureTypeInfos += config.ApplyToTypeInfo;
