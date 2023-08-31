@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -10,8 +11,8 @@ namespace Lib;
 
 public sealed class ConfiguredJsonSerializerContext : JsonSerializerContext, IJsonTypeInfoResolver
 {
-    private readonly List<IJsonTypeInfoResolver> _contexts = new();
-    private readonly List<DataObjectConfig> _dtoConfigs = new();
+    private readonly ImmutableArray<IJsonTypeInfoResolver> _contexts;
+    private readonly ImmutableArray<DataObjectConfig> _dtoConfigs;
     private readonly Action<JsonTypeInfo>? _configureTypeInfos;
 
     private readonly ConcurrentDictionary<Type, JsonTypeInfo?> _typeInfoCache = new();
@@ -25,8 +26,8 @@ public sealed class ConfiguredJsonSerializerContext : JsonSerializerContext, IJs
         Action<JsonTypeInfo>? configureTypeInfos
     ) : base(options)
     {
-        _contexts.AddRange(contexts);
-        _dtoConfigs.AddRange(dtoConfigs);
+        _contexts = contexts.ToImmutableArray();
+        _dtoConfigs = dtoConfigs.ToImmutableArray();
         _configureTypeInfos = configureTypeInfos;
 
         _getTypeInfoFromContexts = GetTypeInfoFromContexts;
